@@ -17,7 +17,7 @@ export async function POST(req) {
 
     // Call Groq API with full conversation for memory
     const response = await groqClient.chat({
-      model: "your-working-model", // replace with your chosen model
+      model: "llama-3.1-8b-instant", // replace with your chosen model
       messages: conversationHistory
     });
 
