@@ -1,67 +1,106 @@
 "use client";
+import { useState } from "react";
+import { Send } from "lucide-react";
 
-import { useState, KeyboardEvent } from "react";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
-
-export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
+export default function Home() {
   const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
 
-  const sendMessage = async () => {
-    if (!input) return;
+  async function sendMessage() {
+    if (!input.trim()) return;
+    const userMessage = { sender: "user", text: input };
+    setMessages((prev) => [...prev, userMessage]);
     setLoading(true);
+    
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: input }),
+    });
+    const data = await res.json();
+    const botMessage = { sender: "assistant", text: data.reply };
+    setMessages((prev) => [...prev, botMessage]);
+    setLoading(false);
+    setInput("");
+  }
 
-    const newMessages = [...messages, { role: "user", content: input }];
-    setMessages(newMessages);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input })
-      });
-
-      const data = await res.json();
-
-      setMessages([...newMessages, { role: "assistant", content: data.reply }]);
-      setInput("");
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+  function handleKeyPress(e: React.KeyboardEvent) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") sendMessage();
-  };
+  }
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: 20 }}>
-      <h1>ZaidGPT</h1>
-      <div style={{ minHeight: 300, border: "1px solid #ccc", padding: 10 }}>
-        {messages.map((msg, i) => (
-          <p key={i} style={{ textAlign: msg.role === "user" ? "right" : "left" }}>
-            <strong>{msg.role}:</strong> {msg.content}
-          </p>
-        ))}
+    <main className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-3xl flex flex-col h-[600px] border border-gray-200 rounded-2xl shadow-sm bg-white overflow-hidden">
+        {/* Header */}
+        <div className="border-b border-gray-200 px-6 py-4 bg-white">
+          <h1 className="text-2xl font-semibold text-gray-900">ZaidGPT</h1>
+          <p className="text-sm text-gray-500 mt-1">Your AI Assistant</p>
+        </div>
+
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {messages.length === 0 && (
+            <div className="flex items-center justify-center h-full text-gray-400">
+              <p>Start a conversation...</p>
+            </div>
+          )}
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex ${
+                msg.sender === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                  msg.sender === "user"
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-900"
+                }`}
+              >
+                <p className="text-sm leading-relaxed">{msg.text}</p>
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 rounded-2xl px-4 py-3">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></span>
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input Area */}
+        <div className="border-t border-gray-200 p-4 bg-white">
+          <div className="flex gap-2 items-center">
+            <input
+              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 text-gray-900 placeholder-gray-400"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your message..."
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || loading}
+              className="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-colors duration-200 flex items-center justify-center"
+            >
+              <Send size={20} />
+            </button>
+          </div>
+        </div>
       </div>
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={loading}
-        style={{ width: "80%", padding: 10 }}
-      />
-      <button onClick={sendMessage} disabled={loading} style={{ padding: 10 }}>
-        {loading ? "Sending..." : "Send"}
-      </button>
-    </div>
+    </main>
   );
 }
