@@ -13,12 +13,13 @@ export default function Home() {
     const userMessage = { sender: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
     setLoading(true);
-    
+
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: input }),
     });
+
     const data = await res.json();
     const botMessage = { sender: "assistant", text: data.reply };
     setMessages((prev) => [...prev, botMessage]);
@@ -34,8 +35,20 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+    <main className="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative">
+
+      {/* Floating Classroom Button (BOTTOM LEFT) */}
+      <a
+        href="https://classroom.google.com/c/NzA4NTQ0NzA3NTc5?cjc=5e644tru"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-4 left-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow-md transition text-sm"
+      >
+        Join our Google Classroom
+      </a>
+
       <div className="w-full max-w-3xl flex flex-col h-[600px] border border-gray-200 rounded-2xl shadow-sm bg-white overflow-hidden">
+
         {/* Header */}
         <div className="border-b border-gray-200 px-6 py-4 bg-white">
           <h1 className="text-2xl font-semibold text-gray-900">ZaidGPT</h1>
@@ -49,6 +62,7 @@ export default function Home() {
               <p>Start a conversation...</p>
             </div>
           )}
+
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -67,13 +81,20 @@ export default function Home() {
               </div>
             </div>
           ))}
+
           {loading && (
             <div className="flex justify-start">
               <div className="bg-gray-100 rounded-2xl px-4 py-3">
                 <div className="flex gap-1">
                   <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></span>
+                  <span
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.1s" }}
+                  ></span>
+                  <span
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.2s" }}
+                  ></span>
                 </div>
               </div>
             </div>
@@ -90,6 +111,7 @@ export default function Home() {
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
             />
+
             <button
               onClick={sendMessage}
               disabled={!input.trim() || loading}
