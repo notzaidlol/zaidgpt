@@ -1,15 +1,21 @@
 "use client";
 import { useState } from "react";
 
+type Message = {
+  sender: "user" | "assistant";
+  text: string;
+};
+
 export default function Home() {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
   async function sendMessage() {
     if (!input.trim()) return;
-    const userMessage = { sender: "user", text: input };
-    setMessages((prev) => [...prev, userMessage]);
+
+    const userMessage: Message = { sender: "user", text: input };
+    setMessages(prev => [...prev, userMessage]);
     setLoading(true);
 
     const res = await fetch("/api/chat", {
@@ -17,9 +23,11 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: input }),
     });
+
     const data = await res.json();
-    const botMessage = { sender: "assistant", text: data.reply };
-    setMessages((prev) => [...prev, botMessage]);
+
+    const botMessage: Message = { sender: "assistant", text: data.reply ?? "" };
+    setMessages(prev => [...prev, botMessage]);
     setLoading(false);
     setInput("");
   }
@@ -33,7 +41,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative">
-
       {/* Floating Buttons (BOTTOM LEFT) */}
       <div className="fixed bottom-4 left-4 flex gap-2">
         <a
@@ -65,7 +72,6 @@ export default function Home() {
       </div>
 
       <div className="w-full max-w-3xl flex flex-col h-[600px] border border-gray-200 rounded-2xl shadow-sm bg-white overflow-hidden">
-
         {/* Header */}
         <div className="border-b border-gray-200 px-6 py-4 bg-white">
           <h1 className="text-2xl font-semibold text-gray-900">ZaidGPT</h1>
@@ -79,27 +85,39 @@ export default function Home() {
               <p>Start a conversation...</p>
             </div>
           )}
+
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex ${
+                msg.sender === "user" ? "justify-end" : "justify-start"
+              }`}
             >
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                  msg.sender === "user" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+                  msg.sender === "user"
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-900"
                 }`}
               >
                 <p className="text-sm leading-relaxed">{msg.text}</p>
               </div>
             </div>
           ))}
+
           {loading && (
             <div className="flex justify-start">
               <div className="bg-gray-100 rounded-2xl px-4 py-3">
                 <div className="flex gap-1">
                   <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></span>
-                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></span>
+                  <span
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.1s" }}
+                  ></span>
+                  <span
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.2s" }}
+                  ></span>
                 </div>
               </div>
             </div>
@@ -112,10 +130,11 @@ export default function Home() {
             <input
               className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 text-gray-900 placeholder-gray-400"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={e => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your message..."
             />
+
             <button
               onClick={sendMessage}
               disabled={!input.trim() || loading}
@@ -137,7 +156,6 @@ export default function Home() {
             </button>
           </div>
         </div>
-
       </div>
     </main>
   );
