@@ -92,7 +92,7 @@ export default function Home() {
               onClick={launchab}
               className={`${isDark ? "bg-red-700 hover:bg-red-600 text-white" : "bg-red-100 hover:bg-red-200 text-red-900"} px-6 py-2 rounded-lg font-medium transition-colors`}
             >
-              Panic Button
+              Launch in About:blank
             </button>
           </div>
         </div>
