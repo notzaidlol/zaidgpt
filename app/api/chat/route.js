@@ -7,17 +7,21 @@ const groq = new Groq({
 
 export async function POST(req) {
   try {
-    const { message } = await req.json();
+    const { messages } = await req.json();
 
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: message }],
+      messages,
     });
 
     const reply = response.choices?.[0]?.message?.content || "";
+
     return NextResponse.json({ reply });
   } catch (error) {
     console.error("Error:", error);
-    return NextResponse.json({ reply: "Server error." }, { status: 500 });
+    return NextResponse.json(
+      { reply: "Server error." },
+      { status: 500 }
+    );
   }
 }
