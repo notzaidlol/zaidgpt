@@ -10,7 +10,7 @@ export async function POST(req) {
     const { messages } = await req.json();
 
     const response = await groq.chat.completions.create({
-      model: "deepseek-r1-distill-llama-70b",
+      model: "openai/gpt-oss-120b",
       messages: [
         {
           role: "system",
