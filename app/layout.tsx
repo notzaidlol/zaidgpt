@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Google Classroom",
   description: ".",
+  icons: {
+    icon: "https://ssl.gstatic.com/classroom/favicon.png",
+    shortcut: "https://ssl.gstatic.com/classroom/favicon.png",
+    apple: "https://ssl.gstatic.com/classroom/favicon.png",
+  },
 };
 
 export default function RootLayout({
